@@ -19,7 +19,7 @@ app.post("/sign-up", (req, res) => {
   }
 
   USERS.push({ username, avatar });
-  res.status(200).send("OK");
+  res.status(201).send("OK");
 });
 
 app.post("/tweets", (req, res) => {
@@ -40,7 +40,23 @@ app.post("/tweets", (req, res) => {
   }
 
   TWEETS.push({ username, tweet });
-  res.status(200).send("OK");
+  res.status(201).send("OK");
+});
+
+app.get("/tweets", (req, res) => {
+  const ultimosTweets = TWEETS.slice(TWEETS.length - 10);
+
+  const dataUltimosTweets = ultimosTweets.map((tweet) => {
+    const user = USERS.find((user) => user.username == tweet.username);
+
+    return {
+      username: user.username,
+      avatar: user.avatar,
+      tweet: tweet.tweet,
+    };
+  });
+
+  res.status(200).json(dataUltimosTweets);
 });
 
 app.listen(5000, () => {
