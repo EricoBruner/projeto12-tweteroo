@@ -36,7 +36,7 @@ app.post("/tweets", (req, res) => {
   const userExist = USERS.find((user) => user.username == username);
 
   if (!userExist) {
-    return res.status(400).send("UNAUTHORIZED");
+    return res.status(401).send("UNAUTHORIZED");
   }
 
   TWEETS.push({ username, tweet });
@@ -57,6 +57,23 @@ app.get("/tweets", (req, res) => {
   });
 
   res.status(200).json(dataUltimosTweets);
+});
+
+app.get("/tweets/:username", (req, res) => {
+  const { username } = req.params;
+
+  const user = USERS.find((user) => user.username == username);
+
+  const tweets = TWEETS.map((tweet) => {
+    if (tweet.username == username)
+      return {
+        username: user.username,
+        avatar: user.avatar,
+        tweet: tweet.tweet,
+      };
+  });
+
+  res.status(200).json(tweets);
 });
 
 app.listen(5000, () => {
