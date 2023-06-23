@@ -23,23 +23,24 @@ app.post("/sign-up", (req, res) => {
 });
 
 app.post("/tweets", (req, res) => {
-  const { username, tweet } = req.body;
+  const { tweet } = req.body;
+  const { user } = req.headers;
 
-  if (!username || !tweet) {
+  if (!user || !tweet) {
     return res.status(400).send("Todos os campos são obrigatórios!");
   }
 
-  if (typeof username != "string" || typeof tweet != "string") {
+  if (typeof user != "string" || typeof tweet != "string") {
     return res.status(400).send("Todos os campos são obrigatórios!");
   }
 
-  const userExist = USERS.find((user) => user.username == username);
+  const userExist = USERS.find((USER) => USER.username == user);
 
   if (!userExist) {
     return res.status(401).send("UNAUTHORIZED");
   }
 
-  TWEETS.push({ username, tweet });
+  TWEETS.push({ user, tweet });
   return res.status(201).send("OK");
 });
 
