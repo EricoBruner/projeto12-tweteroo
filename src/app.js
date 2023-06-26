@@ -1,4 +1,5 @@
 import express, { json } from "express";
+import cors from "cors";
 
 let USERS = [];
 let TWEETS = [];
@@ -6,6 +7,7 @@ let TWEETS = [];
 const app = express();
 
 app.use(json());
+app.use(cors());
 
 app.post("/sign-up", (req, res) => {
   const { username, avatar } = req.body;
@@ -40,7 +42,7 @@ app.post("/tweets", (req, res) => {
     return res.status(401).send("UNAUTHORIZED");
   }
 
-  TWEETS.push({ user, tweet });
+  TWEETS.push({ username: user, tweet });
   return res.status(201).send("OK");
 });
 
@@ -49,15 +51,23 @@ app.get("/tweets", (req, res) => {
 
   if (page) {
     const totalPages = Math.ceil(TWEETS.length / 10);
+
     if (page > totalPages) {
-      return res.status(400).json("Página solicitada não existe!");
+      return res.status(200).json([]);
     }
 
     if (page > 0) {
-      const startIndex = TWEETS.length - page * 10;
-      const endIndex = startIndex + 10;
+      TWEETS.reverse();
+      let paginaTweets = [];
 
-      const paginaTweets = TWEETS.slice(startIndex, endIndex);
+      const startIndex = (page - 1) * 10;
+      const endIndex = Math.min(startIndex + 10, TWEETS.length);
+
+      if (page == totalPages) {
+        paginaTweets = TWEETS.slice(startIndex);
+      } else {
+        paginaTweets = TWEETS.slice(startIndex, endIndex);
+      }
 
       const dataUltimosTweets = paginaTweets.map((tweet) => {
         const user = USERS.find((user) => user.username == tweet.username);
@@ -85,7 +95,24 @@ app.get("/tweets", (req, res) => {
     };
   });
 
-  return res.status(200).json(dataUltimosTweets);
+  return res.status(200).json(dataUltimosTweets.reverse());
+});
+
+app.get("/tweets/:username", (req, res) => {
+  const { username } = req.params;
+  const user = USERS.find((user) => user.username == username);
+
+  const tweetsUser = TWEETS.filter((tweet) => tweet.username == username);
+
+  const dataTweetsUser = tweetsUser.map((tweet) => {
+    return {
+      username: user.username,
+      avatar: user.avatar,
+      tweet: tweet.tweet,
+    };
+  });
+
+  return res.status(200).json(dataTweetsUser.reverse());
 });
 
 app.listen(5000, () => {
