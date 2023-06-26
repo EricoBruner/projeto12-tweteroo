@@ -50,24 +50,19 @@ app.get("/tweets", (req, res) => {
   const { page } = req.query;
 
   if (page) {
-    const totalPages = Math.ceil(TWEETS.length / 10);
+    const totalPaginas = Math.ceil(TWEETS.length / 10);
 
-    if (page > totalPages) {
+    if (page > totalPaginas) {
       return res.status(200).json([]);
     }
 
     if (page > 0) {
-      TWEETS.reverse();
-      let paginaTweets = [];
+      const TweetsReverse = TWEETS.slice().reverse();
 
       const startIndex = (page - 1) * 10;
-      const endIndex = Math.min(startIndex + 10, TWEETS.length);
+      const endIndex = startIndex + 10;
 
-      if (page == totalPages) {
-        paginaTweets = TWEETS.slice(startIndex);
-      } else {
-        paginaTweets = TWEETS.slice(startIndex, endIndex);
-      }
+      const paginaTweets = TweetsReverse.slice(startIndex, endIndex);
 
       const dataUltimosTweets = paginaTweets.map((tweet) => {
         const user = USERS.find((user) => user.username == tweet.username);
@@ -95,7 +90,9 @@ app.get("/tweets", (req, res) => {
     };
   });
 
-  return res.status(200).json(dataUltimosTweets.reverse());
+  const dataUltimosTweetsReverse = [...dataUltimosTweets.reverse()];
+
+  return res.status(200).json(dataUltimosTweetsReverse);
 });
 
 app.get("/tweets/:username", (req, res) => {
@@ -112,7 +109,9 @@ app.get("/tweets/:username", (req, res) => {
     };
   });
 
-  return res.status(200).json(dataTweetsUser.reverse());
+  const dataTweetsUserReverse = [...dataTweetsUser.reverse()];
+
+  return res.status(200).json(dataTweetsUserReverse);
 });
 
 app.listen(5000, () => {
